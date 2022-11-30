@@ -1,5 +1,6 @@
 import flask
 from flask_sqlalchemy import SQLAlchemy
+from howlongtobeatpy import HowLongToBeat
 
 app = flask.Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:password@localhost:5432/game_backlog"
@@ -35,6 +36,12 @@ def get_games():
             temp_game = Game(row.game, row.genre)
             all_games.append(temp_game)
         return all_games
+
+
+def find_game():
+    game = flask.request.form.get("g_name")
+    results = HowLongToBeat(0.0).search(game, similarity_case_sensitive=False)
+    return results
 
 
 @app.route("/")
@@ -88,8 +95,16 @@ def remove():
         return flask.render_template("remove.html")
 
 
+@app.route("/select", methods=["GET", "POST"])
+def select():
+    display_games = find_game()
+    selected_game = flask.request.form.get("selected_game")
+    if flask.request.method == "POST":
+        return flask.render_template("create.html", display_games=display_games, selected_game=selected_game)
+
+
 if __name__ == "__main__":
     app.debug = True
     app.run()
 
-#TODO: Implement API, make pretty, bug fixes, improve functionality, implement exporting
+# TODO: Implement API, make pretty, bug fixes, improve functionality, implement exporting
