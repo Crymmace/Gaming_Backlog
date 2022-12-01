@@ -98,9 +98,15 @@ def remove():
 @app.route("/select", methods=["GET", "POST"])
 def select():
     display_games = find_game()
-    selected_game = flask.request.form.get("selected_game")
     if flask.request.method == "POST":
-        return flask.render_template("create.html", display_games=display_games, selected_game=selected_game)
+        return flask.render_template("create.html", display_games=display_games)
+
+
+@app.route("/this_game", methods=["GET", "POST"])
+def this_game():
+    if flask.request.method == "POST":
+        selected_game = flask.request.form.get("selected_game")
+        return flask.render_template("create.html", selected_game=selected_game)
 
 
 if __name__ == "__main__":
@@ -108,3 +114,5 @@ if __name__ == "__main__":
     app.run()
 
 # TODO: Implement API, make pretty, bug fixes, improve functionality, implement exporting
+# TODO: Convert from flask to Kivy.
+# TODO: Switch from postgres to SQL lite.
