@@ -1,0 +1,49 @@
+<HomeScreen>:
+    GridLayout:
+        cols: 1
+        padding: 15, 15
+        spacing: 20, 20
+    RelativeLayout:
+        Button:
+            text: "Create Backlog"
+            background_color: 1, 1, 1, 0
+            opacity: 1 if self.state == "normal" else 0.5
+            color: 0.1, 0.7, 1, 1
+            on_press: root.create_backlog()
+            size_hint: 0.1, 0.1
+            pos_hint: {"center_x": 0.5, "center_y": 0.6}
+        Button:
+            text: "View Backlog"
+            background_color: 1, 1, 1, 0
+            opacity: 1 if self.state == "normal" else 0.5
+            color: 0.1, 0.7, 1, 1
+            on_press: root.view_backlog()
+            size_hint: 0.1, 0.1
+            pos_hint: {"center_x": 0.5, "center_y": 0.7}
+
+<CreateBacklogScreen>
+    GridLayout:
+        cols: 1
+        padding: 15, 15
+        spacing: 20, 20
+    Label:
+        text: "User Login"
+        font_size: "20sp"
+    TextInput:
+        id: game_name
+        hint_text: "Enter game title"
+    RelativeLayout:
+        Button:
+            text: "Find Game"
+            on_press: root.show_game_results(root.ids.game_name.text)
+            size_hint: 0.1, 0.1
+            pos_hint: {"center_x": 0.5, "center_y": 0.6}
+        Label:
+            id: game_results
+            text: ""
+
+<RootWidget>:
+    HomeScreen:
+        name: "home_screen"
+    CreateBacklogScreen:
+        name: "create_backlog"
