@@ -1,25 +1,32 @@
+FloatLayout:
+    canvas.before:
+        Color:
+            rgba: 0, 1, 0, 1
+        Rectangle:
+            # self here refers to the widget i.e FloatLayout
+            pos: self.pos
+            size: self.size
 <HomeScreen>:
     GridLayout:
         cols: 1
         padding: 15, 15
         spacing: 20, 20
-    RelativeLayout:
-        Button:
-            text: "Create Backlog"
-            background_color: 1, 1, 1, 0
-            opacity: 1 if self.state == "normal" else 0.5
-            color: 0.1, 0.7, 1, 1
-            on_press: root.create_backlog()
-            size_hint: 0.1, 0.1
-            pos_hint: {"center_x": 0.5, "center_y": 0.6}
-        Button:
-            text: "View Backlog"
-            background_color: 1, 1, 1, 0
-            opacity: 1 if self.state == "normal" else 0.5
-            color: 0.1, 0.7, 1, 1
-            on_press: root.view_backlog()
-            size_hint: 0.1, 0.1
-            pos_hint: {"center_x": 0.5, "center_y": 0.7}
+    Button:
+        text: "Create Backlog"
+        background_color: 1, 1, 1, 1
+        opacity: 1 if self.state == "normal" else 0.5
+        color: 0.1, 0.7, 1, 1
+        on_press: root.create_backlog()
+        size_hint: 0.2, 0.1
+        pos_hint: {"center_x": 0.5, "center_y": 0.6}
+    Button:
+        text: "View Backlog"
+        background_color: 1, 1, 1, 1
+        opacity: 1 if self.state == "normal" else 0.5
+        color: 0.1, 0.7, 1, 1
+        on_press: root.view_backlog()
+        size_hint: 0.2, 0.1
+        pos_hint: {"center_x": 0.5, "center_y": 0.7}
 
 <CreateBacklogScreen>
     GridLayout:
@@ -32,15 +39,24 @@
     TextInput:
         id: game_name
         hint_text: "Enter game title"
+        size_hint: 0.3, 0.05
+        pos_hint: {"center_x": 0.2, "center_y": 0.90}
+        spacing: 200, 200
+        background_color: 1, 1, 1, 1
+        multiline: False
+        on_text_validate: root.show_game_results(root.ids.game_name.text)
     RelativeLayout:
         Button:
             text: "Find Game"
             on_press: root.show_game_results(root.ids.game_name.text)
-            size_hint: 0.1, 0.1
-            pos_hint: {"center_x": 0.5, "center_y": 0.6}
+            size_hint: 0.1, 0.05
+            pos_hint: {"center_x": 0.4, "center_y": 0.9}
         Label:
             id: game_results
             text: ""
+        Button:
+            text: "Add to Backlog"
+            size_hint: 0.1, 0.05
 
 <RootWidget>:
     HomeScreen:

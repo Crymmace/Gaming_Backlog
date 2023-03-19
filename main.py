@@ -8,6 +8,7 @@ from kivy.metrics import dp
 from kivy.uix.anchorlayout import AnchorLayout
 from kivymd.app import MDApp
 from kivymd.uix.datatables import MDDataTable
+import webbrowser
 
 
 Builder.load_file("design.kv")
@@ -15,12 +16,12 @@ database = Database("backlog.db")
 
 
 class Game:
-    def __init__(self, name, genre):
-        self.name = name
+    def __init__(self, game, genre):
+        self.game = game
         self.genre = genre
 
     def __repr__(self):
-        return "{}, {}".format(self.name, self.genre)
+        return "{}, {}".format(self.game, self.genre)
 
 
 def get_games():
@@ -43,7 +44,6 @@ def submit():
 
 
 def remove():
-
     if database.search(data, data) > 0:
         data = database.search(data, data).first()
         database.delete(data)
@@ -58,7 +58,8 @@ class HomeScreen(Screen):
 
 
 class CreateBacklogScreen(Screen):
-    def show_game_results(self, game_name):
+    @staticmethod
+    def show_game_results(game_name):
         games = find_game(game_name)
         if games:
             table = Table()
@@ -76,14 +77,18 @@ class Table(MDApp):
         self.theme_cls.primary_palette = "Orange"
         layout = AnchorLayout()
         self.data_tables = MDDataTable(
-            size_hint=(0.9, 0.6),
+            size_hint=(1.0, 0.6),
+            check=True,
             column_data=[
                 ("No.", dp(30)),
                 ("Game", dp(30)),
-                ("Link", dp(30)),
+                ("Link", dp(90)),
             ],
             row_data=self.game_list,
         )
+
+        self.data_tables.bind(on_row_press=self.on_row_press)
+        self.data_tables.bind(on_check_press=self.on_check_press)
         layout.add_widget(self.data_tables)
         return layout
 
@@ -92,6 +97,14 @@ class Table(MDApp):
         for game in games:
             self.game_list.append((str(x), game.game_name, game.game_web_link))
             x += 1
+
+    def on_row_press(self, instance_table, instance_row):
+        if not self.on_check_press:
+            link = self.data_tables.row_data[instance_row.index - 1][-1]
+            webbrowser.open(link)
+
+    def on_check_press(self, instance_table, instance_row):
+        print(instance_row)
 
 
 class ViewBacklogScreen(Screen):
@@ -113,4 +126,5 @@ if __name__ == "__main__":
 # TODO: Implement API, make pretty, bug fixes, improve functionality, implement exporting
 # TODO: Convert from flask to Kivy.
 # TODO: Switch from postgres to SQL lite.
-# TODO: Make links clickable, add ability to select data from rows, add ability to add selection to database.
+# TODO: Add ability to select data from rows, add ability to add selection to database
+# TODO: Fix checkbox affecting on row click functionality

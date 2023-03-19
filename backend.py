@@ -9,8 +9,8 @@ class Database:
         self.cur.execute("CREATE TABLE IF NOT EXISTS backlog (id INTEGER PRIMARY KEY, title text, genre text)")
         self.conn.commit()
 
-    def insert(self, title, genre):
-        self.cur.execute("INSERT INTO backlog VALUES (NULL, ?, ?)", (title, genre))
+    def insert(self, game):
+        self.cur.execute("INSERT INTO backlog VALUES (NULL, ?, ?)", game)
         self.conn.commit()
 
     def view(self):
@@ -18,8 +18,8 @@ class Database:
         rows = self.cur.fetchall()
         return rows
 
-    def search(self, title="", genre=""):
-        self.cur.execute("SELECT * FROM backlog WHERE title=? OR genre=?", (title, genre))
+    def search(self, game="", genre=""):
+        self.cur.execute("SELECT * FROM backlog WHERE title=? OR genre=?", (game, genre))
         rows = self.cur.fetchall()
         return rows
 
@@ -27,8 +27,8 @@ class Database:
         self.cur.execute("DELETE FROM backlog WHERE id=?", (id,))
         self.conn.commit()
 
-    def update(self, id, title, genre):
-        self.cur.execute("UPDATE backlog SET title=?, genre=? WHERE id=?", (title, genre, id))
+    def update(self, id, game, genre):
+        self.cur.execute("UPDATE backlog SET title=?, genre=? WHERE id=?", (game, genre, id))
         self.conn.commit()
 
     def __del__(self):
