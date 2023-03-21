@@ -88,7 +88,6 @@ class Table(MDApp):
         )
 
         self.data_tables.bind(on_row_press=self.on_row_press)
-        self.data_tables.bind(on_check_press=self.on_check_press)
         layout.add_widget(self.data_tables)
         return layout
 
@@ -99,12 +98,16 @@ class Table(MDApp):
             x += 1
 
     def on_row_press(self, instance_table, instance_row):
-        if not self.on_check_press:
-            link = self.data_tables.row_data[instance_row.index - 1][-1]
+        checks = self.data_tables.get_row_checks()
+        link = self.data_tables.row_data[instance_row.index - 1][-1]
+        try:
+            if link == checks[0][2]:
+                webbrowser.open(link)
+                print(self.data_tables.get_row_checks())
+        except IndexError:
             webbrowser.open(link)
-
-    def on_check_press(self, instance_table, instance_row):
-        print(instance_row)
+        except self.data_tables.on_check_press:
+            pass
 
 
 class ViewBacklogScreen(Screen):
