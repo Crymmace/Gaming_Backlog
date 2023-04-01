@@ -55,8 +55,10 @@ FloatLayout:
             id: game_results
             text: ""
         Button:
-            text: "Add to Backlog"
-            size_hint: 0.1, 0.05
+            text: "Add Selected to Backlog"
+            size_hint: 0.22, 0.05
+            on_press: root.submit()
+            pos_hint: {"center_x": 0.16, "center_y": 0.1}
 
 <RootWidget>:
     HomeScreen:

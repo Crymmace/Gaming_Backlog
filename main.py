@@ -16,36 +16,34 @@ database = Database("backlog.db")
 
 
 class Game:
-    def __init__(self, game, genre):
+    def __init__(self, game):
         self.game = game
-        self.genre = genre
 
     def __repr__(self):
-        return "{}, {}".format(self.game, self.genre)
+        return "{}".format(self.game)
 
 
 def get_games():
     all_games = []
     data = database.view()
     for row in data:
-        temp_game = Game(row.game, row.genre)
+        temp_game = Game(row.game)
         all_games.append(temp_game)
     return all_games
 
 
-def find_game(game_name):
-    results = HowLongToBeat(0.0).search(game_name, similarity_case_sensitive=False)
+def find_game(game):
+    results = HowLongToBeat(0.0).search(game, similarity_case_sensitive=False)
     return results
 
 
-def submit():
-    data = (game, genre)
-    database.insert(data, data)
+def submit(game):
+    database.insert(game)
 
 
-def remove():
-    if database.search(data, data) > 0:
-        data = database.search(data, data).first()
+def remove(game):
+    if database.search(game) > 0:
+        data = database.search(game).first()
         database.delete(data)
 
 
@@ -71,6 +69,7 @@ class CreateBacklogScreen(Screen):
 class Table(MDApp):
     data_tables = None
     game_list = []
+    old_checks = []
 
     def build(self):
         self.theme_cls.theme_style = "Dark"
@@ -98,16 +97,19 @@ class Table(MDApp):
             x += 1
 
     def on_row_press(self, instance_table, instance_row):
+        start_index, end_index = instance_row.table.recycle_data[instance_row.index]["range"]
         checks = self.data_tables.get_row_checks()
-        link = self.data_tables.row_data[instance_row.index - 1][-1]
-        try:
-            if link == checks[0][2]:
-                webbrowser.open(link)
-                print(self.data_tables.get_row_checks())
-        except IndexError:
+        link = instance_row.table.recycle_data[end_index]["text"]
+        is_present = False
+        for check in checks:
+            if check[-1] == link:
+                is_present = True
+        for check in self.old_checks:
+            if check[-1] == link:
+                is_present = True
+        self.old_checks = checks
+        if not is_present:
             webbrowser.open(link)
-        except self.data_tables.on_check_press:
-            pass
 
 
 class ViewBacklogScreen(Screen):
@@ -127,7 +129,7 @@ if __name__ == "__main__":
     MainApp().run()
 
 # TODO: Implement API, make pretty, bug fixes, improve functionality, implement exporting
-# TODO: Convert from flask to Kivy.
-# TODO: Switch from postgres to SQL lite.
 # TODO: Add ability to select data from rows, add ability to add selection to database
 # TODO: Fix checkbox affecting on row click functionality
+# TODO: Implement selection wizard with metacritic API
+# TODO: Implement metacritic API
