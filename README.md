@@ -1,16 +1,16 @@
 # Gaming Backlog
 
-###What is it?
+### What is it?
 This is an application to help those of us who have an issue getting through our gaming backlog.
 
-###How do you use it?
+### How do you use it?
 
 I'm glad you asked!
 1. Search for the game you want.
 2. Select the game from the list of results.
 3. Wait for results to generate.
 
-###How does it work?
+### How does it work?
 
 Another great question!
 
@@ -26,7 +26,7 @@ which is a numerical value of the fun per time you can expect from each game.
 
 Then it tucks it in neatly into a database for you to review whenever you're ready.
 
-###Challenges and things I learned
+### Challenges and things I learned
 My big issue in the beginning was figuring out the UI, since I decided to try
 getting the front-end and back-end working simultaneously(which I do not recommend unless you hate sleep).
 
@@ -37,6 +37,6 @@ My big issue with the back-end was trying to implement functionality that doesn'
 with the howlongtobeat API. So I had to learn more about web crawling so I could get some of the information myself.
 This includes the genre from howlongtobeat.com and the score from metacritic.
 
-###In conclusion
+### In conclusion
 This is still a work in progress as I finish up the back-end and get the front-end working,
 but this project has been so much fun and I hope that you enjoy.
