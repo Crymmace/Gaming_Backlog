@@ -3,7 +3,7 @@ from kivy.lang import Builder
 from kivy.uix.widget import Widget
 from kivy.uix.screenmanager import ScreenManager, Screen
 from howlongtobeatpy import HowLongToBeat
-from backend import Database
+from database import Database
 from kivy.metrics import dp
 from kivy.uix.anchorlayout import AnchorLayout
 from kivymd.app import MDApp

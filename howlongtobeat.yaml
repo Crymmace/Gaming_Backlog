@@ -1,0 +1,6 @@
+genre:
+  multiple: true
+  xpath: //*[contains(@class,'GameSummary_profile_info__HZFQu GameSummary_medium___r_ia')]
+  xpath1: //*[contains(@class,'GameSummary_profile_info__HZFQu GameSummary_medium___r_ia')]
+  xpath2: //*[contains(@class,'GameSummary_profile_info__HZFQu GameSummary_medium___r_ia')]
+  xpath3: //*[contains(@class,'GameSummary_profile_info__HZFQu GameSummary_medium___r_ia')]

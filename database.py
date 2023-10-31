@@ -9,8 +9,8 @@ class Database:
         self.cur.execute("CREATE TABLE IF NOT EXISTS backlog (id INTEGER PRIMARY KEY, title text, genre text)")
         self.conn.commit()
 
-    def insert(self, game):
-        self.cur.execute("INSERT INTO backlog VALUES (NULL, ?, ?)", game)
+    def insert(self, game, genre, rating, score, time):
+        self.cur.execute("INSERT INTO backlog VALUES (NULL, ?, ?, ?, ?, ?)", (game, genre, rating, score, time))
         self.conn.commit()
 
     def view(self):
