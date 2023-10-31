@@ -4,12 +4,14 @@
 This is an application to help those of us who have an issue getting through our gaming backlog.
 
 ###How do you use it?
+
 I'm glad you asked!
 1. Search for the game you want.
 2. Select the game from the list of results.
 3. Wait for results to generate.
 
 ###How does it work?
+
 Another great question!
 
 First of all, when you search for a game, the app will utilize the howlongtobeat api.
