@@ -6,7 +6,8 @@ class Database:
     def __init__(self, db):
         self.conn = sqlite3.connect(db)
         self.cur = self.conn.cursor()
-        self.cur.execute("CREATE TABLE IF NOT EXISTS backlog (id INTEGER PRIMARY KEY, title text, genre text)")
+        self.cur.execute("CREATE TABLE IF NOT EXISTS backlog (id INTEGER PRIMARY KEY, title text, genre text,"
+                         "rating text, score text, time text)")
         self.conn.commit()
 
     def insert(self, game, genre, rating, score, time):
