@@ -47,6 +47,7 @@ while True:
             print(selection)
 
             game_selection = functions.game_selection(new_games, selection)
+            print(game_selection)
             url_selection = functions.url_selection(web, selection)
             time_selection = functions.time_selection(time_to_beat, selection)
             genre = functions.get_genre(url_selection)

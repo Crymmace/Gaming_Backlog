@@ -1,2 +1,6 @@
 score:
+  multiple: true
   xpath: //*[@data-v-4cdca868=""]
+  xpath1: //*[@data-v-4cdca868=""]
+  xpath2: //*[@data-v-4cdca868=""]
+  xpath3: //*[@data-v-4cdca868=""]

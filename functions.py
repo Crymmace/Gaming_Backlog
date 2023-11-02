@@ -8,7 +8,14 @@ database = Database("backlog.db")
 
 # Grabs database information.
 def get_games():
-    return database.view()
+    games = []
+    data = database.view()
+    for item in data:
+        temp = ""
+        for column in item:
+            temp += f"{str(column)} "
+        games.append(temp)
+    return games
 
 
 # Searches for game titles based on user input.
@@ -69,16 +76,17 @@ def get_genre2(web_link):
 
 def get_metacritic_score(game):
     game = str(game).lower()
-    game = game.replace(" ", "-").replace("'", "").replace("ö", "o").replace(":", "")
+    game = game.replace(".", " ").replace("'", "").replace("ö", "o").replace(":", "")
     print(game)
-    url = f"https://www.metacritic.com/game/{game}"
+    url = f"https://www.metacritic.com/search/{game}"
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 '
                       '(KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
     response = requests.get(url, headers=headers)
     source = response.text
     extractor = selectorlib.Extractor.from_yaml_file("metacritic.yaml")
-    value = extractor.extract(source)["score"]
+    value = extractor.extract(source)["score"][0]
+    print(value)
     return float(value)
 
 
