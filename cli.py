@@ -53,9 +53,9 @@ while True:
             functions.add_to_database(game_selection, genre, rating, fun, time_selection)
         case "view":
             # Calls function to print entries currently in database.
-            functions.get_games()
+            print(functions.get_games())
         case "delete":
-            functions.get_games()
+            print(functions.get_games())
             choice = int(input("Which would you like to delete? "))
             functions.remove_from_database(choice)
         case "exit":

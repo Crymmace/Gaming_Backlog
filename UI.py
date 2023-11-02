@@ -1,135 +1,96 @@
-from kivy.app import App
-from kivy.lang import Builder
-from kivy.uix.widget import Widget
-from kivy.uix.screenmanager import ScreenManager, Screen
-from howlongtobeatpy import HowLongToBeat
-from database import Database
-from kivy.metrics import dp
-from kivy.uix.anchorlayout import AnchorLayout
-from kivymd.app import MDApp
-from kivymd.uix.datatables import MDDataTable
-import webbrowser
+import functions
+import PySimpleGUI as gui
+import time
+
+new_games = []
+web = []
+time_to_beat = []
+
+gui.theme("Black")
+
+label = gui.Text("Type in a game")
+input_box = gui.InputText(tooltip="Enter game", key="game")
+search_button = gui.Button("Search")
+add_button = gui.Button("Add")
+list_box = gui.Listbox(values=new_games, key="games",
+                       enable_events=True, size=(45, 10))
+view_button = gui.Button("View")
+delete_button = gui.Button("Delete")
+exit_button = gui.Button("Exit")
+
+window = gui.Window("My To-Do App",
+                    layout=[[label],
+                            [input_box, search_button, add_button],
+                            [list_box, view_button, delete_button],
+                            [exit_button]],
+                    font=('Helvetica', 20))
 
 
-Builder.load_file("design.kv")
-database = Database("backlog.db")
+while True:
+    event, values = window.read(timeout=10)
+    match event:
+        case "Search":
+            id_ = values["game"]
+            new_game = functions.find_game(id_)
+            for game in new_game:
+                new_games.append(game.game_name)
+            for url in new_game:
+                web.append(url.game_web_link)
+            for times in new_game:
+                time_to_beat.append(times.main_story)
+            window['games'].update(values=new_games)
 
+        case "Add":
+            selected_game = values['games'][0]
+            print(selected_game)
+            selection = new_games.index(selected_game)
+            print(selection)
 
-class Game:
-    def __init__(self, game):
-        self.game = game
+            game_selection = functions.game_selection(new_games, selection)
+            url_selection = functions.url_selection(web, selection)
+            time_selection = functions.time_selection(time_to_beat, selection)
+            genre = functions.get_genre(url_selection)
+            if not genre:
+                genre = functions.get_genre2(url_selection)
+            rating = functions.get_metacritic_score(game_selection)
+            fun = functions.calculate_fun_quotient(rating, time_selection)
+            functions.add_to_database(game_selection, genre, rating, fun, time_selection)
 
-    def __repr__(self):
-        return "{}".format(self.game)
+            games = functions.get_games()
+            new_game = values['games']
+            window['games'].update(values=games)
 
+            time.sleep(0.5)
+            games = functions.get_games()
+            new_games.clear()
 
-def get_games():
-    all_games = []
-    data = database.view()
-    for row in data:
-        temp_game = Game(row.game)
-        all_games.append(temp_game)
-    return all_games
+        case "View":
+            games = functions.get_games()
+            new_game = values['games']
+            print(new_game)
+            print(functions.find_game(new_game))
+            window['games'].update(values=games)
+            time.sleep(0.5)
+            games = functions.get_games()
 
+        case "Delete":
+            try:
+                game_to_delete = values['games'][0]
+                games = functions.get_games()
+                functions.remove_from_database(game_to_delete[0])
+                functions.get_games()
+                window['games'].update(values=games)
+                window['game'].update(value="")
+            except IndexError:
+                gui.popup("Please select an item.", font=("Helvetica", 20))
 
-def find_game(game):
-    results = HowLongToBeat(0.0).search(game, similarity_case_sensitive=False)
-    return results
+        case "Exit":
+            break
 
+        case "todos":
+            window['todo'].update(value=values['todos'][0])
 
-def submit(game):
-    database.insert(game)
+        case gui.WIN_CLOSED:
+            break
 
-
-def remove(game):
-    if database.search(game) > 0:
-        data = database.search(game).first()
-        database.delete(data)
-
-
-class HomeScreen(Screen):
-    def create_backlog(self):
-        self.manager.current = "create_backlog"
-
-    def view_backlog(self):
-        self.manager.current = "view_backlog"
-
-
-class CreateBacklogScreen(Screen):
-    @staticmethod
-    def show_game_results(game_name):
-        games = find_game(game_name)
-        if games:
-            table = Table()
-            table.populate(games)
-            table.build()
-            table.run()
-
-
-class Table(MDApp):
-    data_tables = None
-    game_list = []
-    old_checks = []
-
-    def build(self):
-        self.theme_cls.theme_style = "Dark"
-        self.theme_cls.primary_palette = "Orange"
-        layout = AnchorLayout()
-        self.data_tables = MDDataTable(
-            size_hint=(1.0, 0.6),
-            check=True,
-            column_data=[
-                ("No.", dp(30)),
-                ("Game", dp(30)),
-                ("Link", dp(90)),
-            ],
-            row_data=self.game_list,
-        )
-
-        self.data_tables.bind(on_row_press=self.on_row_press)
-        layout.add_widget(self.data_tables)
-        return layout
-
-    def populate(self, games):
-        x = 1
-        for game in games:
-            self.game_list.append((str(x), game.game_name, game.game_web_link))
-            x += 1
-
-    def on_row_press(self, instance_table, instance_row):
-        start_index, end_index = instance_row.table.recycle_data[instance_row.index]["range"]
-        checks = self.data_tables.get_row_checks()
-        link = instance_row.table.recycle_data[end_index]["text"]
-        is_present = False
-        for check in checks:
-            if check[-1] == link:
-                is_present = True
-        for check in self.old_checks:
-            if check[-1] == link:
-                is_present = True
-        self.old_checks = checks
-        if not is_present:
-            webbrowser.open(link)
-
-
-class ViewBacklogScreen(Screen):
-    pass
-
-
-class RootWidget(ScreenManager):
-    pass
-
-
-class MainApp(MDApp):
-    def build(self):
-        return RootWidget()
-
-
-if __name__ == "__main__":
-    MainApp().run()
-
-# TODO: Implement API, make pretty, bug fixes, improve functionality, implement exporting
-# TODO: Add ability to select data from rows, add ability to add selection to database
-# TODO: Fix checkbox affecting on row click functionality
-# TODO: Implement selection wizard with metacritic API
-# TODO: Implement metacritic API
+window.close()

@@ -8,8 +8,7 @@ database = Database("backlog.db")
 
 # Grabs database information.
 def get_games():
-    data = database.view()
-    print(data)
+    return database.view()
 
 
 # Searches for game titles based on user input.
