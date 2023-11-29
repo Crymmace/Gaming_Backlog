@@ -9,7 +9,9 @@ while True:
             result = functions.find_game(game_title)
             games = []
             web = []
-            time = []
+            time_main_story = []
+            time_extras = []
+            time_completionist = []
 
             # Grabs game titles and appends to games list.
             for title in result:
@@ -19,7 +21,9 @@ while True:
                 web.append(url.game_web_link)
             # Grabs time it takes to beat main story and appends to time list.
             for times in result:
-                time.append(times.main_story)
+                time_main_story.append(times.main_story)
+                time_extras.append(times.main_extra)
+                time_completionist.append(times.completionist)
 
             # Prints out an enumerated games list.
             i = 1
@@ -31,10 +35,17 @@ while True:
             choice = int(input("Which game would you like? "))
             choice = choice - 1
 
+            preference = input("Which do you prefer? \n"
+                               "1. Main Story \n"
+                               "2. Main Story and Extras \n"
+                               "3. Completionist ")
+
             # Calls each function for game, web, and time, and assigns them to the corresponding variable.
             game_selection = functions.game_selection(games, choice)
             url_selection = functions.url_selection(web, choice)
-            time_selection = functions.time_selection(time, choice)
+            main_selection = functions.time_selection(time_main_story, choice)
+            extra_selection = functions.time_selection(time_extras, choice)
+            completionist_selection = functions.time_selection(time_completionist, choice)
 
             # Calls get_genre functions with url_selection as the parameter and assigns value to genre variable.
             genre = functions.get_genre(url_selection)
@@ -47,18 +58,24 @@ while True:
 
             # Calls calculate_fun_quotient function with rating and time_selection() as parameters
             # and assigns value to fun variable.
-            fun = functions.calculate_fun_quotient(rating, time_selection)
+            fun = functions.calculate_fun_quotient(rating, main_selection, extra_selection,
+                                                   completionist_selection, preference)
 
             # Adds all game information to database.
-            functions.add_to_database(game_selection, genre, rating, fun, time_selection)
+            functions.add_to_database(game_selection, genre, rating, main_selection, extra_selection,
+                                      completionist_selection, fun)
+
         case "view":
             # Calls function to print entries currently in database.
             print(functions.get_games())
+
         case "delete":
             print(functions.get_games())
             choice = int(input("Which would you like to delete? "))
             functions.remove_from_database(choice)
+
         case "exit":
             break
+
         case _:
             print("Please select a valid option")

@@ -2,6 +2,7 @@ from howlongtobeatpy import HowLongToBeat
 from database import Database
 import requests
 import selectorlib
+from bs4 import BeautifulSoup
 
 database = Database("backlog.db")
 
@@ -52,7 +53,6 @@ def get_genre(web_link):
     values = extractor.extract(source)["genre"]
     # To accommodate for games that have multiple divs with the same name and/or multiple genres.
     for value in values:
-        print(values)
         if "Genre s" in value:
             return value[10:]
         elif "Genre" in value:
@@ -74,10 +74,20 @@ def get_genre2(web_link):
             return value[8:]
 
 
+def get_all_genres():
+    url = requests.get('https://howlongtobeat.com/')
+    soup = BeautifulSoup(url.text, 'html.parser')
+
+    soup = soup.prettify()
+    print(soup)
+
+
+# get_all_genres()
+
+
 def get_metacritic_score(game):
     game = str(game).lower()
     game = game.replace(".", " ").replace("'", "").replace("ö", "o").replace(":", "")
-    print(game)
     url = f"https://www.metacritic.com/search/{game}"
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 '
@@ -86,19 +96,25 @@ def get_metacritic_score(game):
     source = response.text
     extractor = selectorlib.Extractor.from_yaml_file("metacritic.yaml")
     value = extractor.extract(source)["score"][0]
-    print(value)
     return float(value)
 
 
-def calculate_fun_quotient(rate, amount_of_time):
-    fun_quotient = rate/amount_of_time
-    fun_quotient = 100 - fun_quotient
+def calculate_fun_quotient(rate, main, extra, completionist, preference):
+    if preference == "1" and main != 0:
+        fun_quotient = rate/main
+    elif preference == "2" and extra != 0:
+        fun_quotient = rate/extra
+    elif preference == "3" and completionist != 0:
+        fun_quotient = rate/completionist
+    else:
+        fun_quotient = 0
     return fun_quotient
 
 
-def add_to_database(games_title, genre_selection, metacritic_score, fun_quotient, time_to_beat):
-    database.insert(games_title, genre_selection, metacritic_score, fun_quotient,
-                    time_to_beat)
+def add_to_database(games_title, genre_selection, metacritic_score,
+                    main_story, main_story_and_extras, completionist, fun_quotient):
+    database.insert(games_title, genre_selection, metacritic_score,
+                    main_story, main_story_and_extras, completionist, fun_quotient)
 
 
 def remove_from_database(selection):

@@ -4,14 +4,16 @@ import sqlite3
 class Database:
 
     def __init__(self, db):
-        self.conn = sqlite3.connect(db)
+        self.conn = sqlite3.connect(db, timeout=30)
         self.cur = self.conn.cursor()
         self.cur.execute("CREATE TABLE IF NOT EXISTS backlog (id INTEGER PRIMARY KEY, title text, genre text,"
                          "rating text, score text, time text)")
         self.conn.commit()
 
-    def insert(self, game, genre, rating, score, time):
-        self.cur.execute("INSERT INTO backlog VALUES (NULL, ?, ?, ?, ?, ?)", (game, genre, rating, score, time))
+    def insert(self, game, genre, rating, main_story, main_story_and_extras, completionist, score,):
+        self.cur.execute("INSERT INTO backlog VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)", (game, genre, rating,
+                                                                                    main_story, main_story_and_extras,
+                                                                                    completionist, score))
         self.conn.commit()
 
     def view(self):
