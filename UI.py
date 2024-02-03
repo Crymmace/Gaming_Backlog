@@ -1,9 +1,9 @@
 import functions
 import PySimpleGUI as gui
-import time
 
 new_games = []
 web = []
+images = []
 main_story = []
 extras = []
 completionist = []
@@ -11,28 +11,36 @@ genres = []
 selected_genres = []
 options = ["1. Main Story", "2. Main Story and Extras", "3. Completionist"]
 
-gui.theme("Black")
+gui.theme("BlueMono")
 
-label = gui.Text("Type in a game")
-input_box = gui.InputText(tooltip="Enter game", key="game")
-search_button = gui.Button("Search")
-add_button = gui.Button("Add")
-select_button = gui.Button("Select")
-list_box = gui.Listbox(values=new_games, key="games",
-                       enable_events=True, size=(45, 10))
-choice_box = gui.Listbox(values=options, key="choice",
-                         enable_events=True, size=(20, 5))
-view_button = gui.Button("View")
-delete_button = gui.Button("Delete")
-exit_button = gui.Button("Exit")
+search_layout = [
+    [gui.Text("Type in a game")],
+    [gui.InputText(tooltip="Enter game", key="game")],
+    [gui.Button("Search")],
+    [gui.Listbox(values=new_games, key="games", enable_events=True, size=(45, 10))],
+    [gui.Button("Add")]
+]
 
-window = gui.Window("My To-Do App",
-                    layout=[[label],
-                            [input_box, search_button, add_button],
-                            [list_box, choice_box, select_button],
-                            [view_button, delete_button, exit_button ]],
-                    font=('Helvetica', 20))
+database_layout = [
+    [gui.Listbox(values=new_games, key="database_games", enable_events=True, size=(45, 10)), gui.Button("Delete")],
+    [gui.Button("Update")],
+    [gui.Button("Exit")],
+]
 
+preference_layout = [
+    [gui.Listbox(values=options, key="choice", enable_events=True, size=(20, 5)), gui.Button("Select")],
+    [gui.Text("", key="text")]
+]
+
+tab_group = [
+    [gui.TabGroup(
+        [[gui.Tab("Find Games", search_layout),
+          gui.Tab("View Games", database_layout),
+          gui.Tab("Preferences", preference_layout)]],
+        tab_location='topleft')
+    ]
+]
+window = gui.Window("My To-Do App", tab_group)
 
 while True:
     event, values = window.read(timeout=10)
@@ -44,6 +52,8 @@ while True:
                 new_games.append(game.game_name)
             for url in new_game:
                 web.append(url.game_web_link)
+            for image in new_game:
+                images.append(image.game_image_url)
             for times in new_game:
                 main_story.append(times.main_story)
                 extras.append(times.main_extra)
@@ -52,6 +62,7 @@ while True:
 
         case "Select":
             preference = values['choice'][0][0]
+            window['text'].update(value=f"{values['choice'][0]}")
 
         case "Add":
             try:
@@ -79,28 +90,23 @@ while True:
 
                 games = functions.get_games()
                 new_game = values['games']
-                window['games'].update(values=games)
-
-                time.sleep(0.5)
-                games = functions.get_games()
                 new_games.clear()
             except NameError:
                 error = gui.popup_ok("Please select a preference.")
 
-        case "View":
+        case "Update":
             games = functions.get_games()
             new_game = values['games']
-            window['games'].update(values=games)
-            time.sleep(0.5)
+            window['database_games'].update(values=games)
             games = functions.get_games()
 
         case "Delete":
             try:
-                game_to_delete = values['games'][0]
+                game_to_delete = values['database_games'][0]
                 games = functions.get_games()
                 functions.remove_from_database(game_to_delete[0])
                 functions.get_games()
-                window['games'].update(values=games)
+                window['database_games'].update(values=games)
                 window['game'].update(value="")
             except IndexError:
                 gui.popup("Please select an item.", font=("Helvetica", 20))
@@ -115,3 +121,5 @@ while True:
             break
 
 window.close()
+
+

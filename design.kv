@@ -1,3 +1,5 @@
+#:kivy 1.0.9
+
 FloatLayout:
     canvas.before:
         Color:
@@ -60,8 +62,24 @@ FloatLayout:
             on_press: root.submit()
             pos_hint: {"center_x": 0.16, "center_y": 0.1}
 
+<ViewBacklogScreen>
+    on_enter: root.get_games()
+    padding: 15, 15
+    spacing: 20, 20
+
+<RV>:
+    viewclass: 'Label'
+    RecycleBoxLayout:
+        default_size: None, dp(56)
+        default_size_hint: 1, None
+        size_hint_y: None
+        height: self.minimum_height
+        orientation: 'vertical'
+
 <RootWidget>:
     HomeScreen:
         name: "home_screen"
     CreateBacklogScreen:
         name: "create_backlog"
+    ViewBacklogScreen:
+        name: "view_backlog"

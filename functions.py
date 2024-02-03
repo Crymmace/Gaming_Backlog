@@ -119,3 +119,6 @@ def add_to_database(games_title, genre_selection, metacritic_score,
 
 def remove_from_database(selection):
     database.delete(selection)
+
+
+

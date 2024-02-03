@@ -8,6 +8,7 @@ while True:
 
             result = functions.find_game(game_title)
             games = []
+            platforms = []
             web = []
             time_main_story = []
             time_extras = []
@@ -16,10 +17,13 @@ while True:
             # Grabs game titles and appends to games list.
             for title in result:
                 games.append(title.game_name)
+            # Grabs game platforms and appends to platforms list.
+            for platform in result:
+                platforms.append(platform.profile_platforms)
             # Grabs game url and appends to web list.
             for url in result:
                 web.append(url.game_web_link)
-            # Grabs time it takes to beat main story and appends to time list.
+            # Grabs time it takes to beat main story, extras, and completionist and appends to appropriate list.
             for times in result:
                 time_main_story.append(times.main_story)
                 time_extras.append(times.main_extra)
@@ -27,13 +31,16 @@ while True:
 
             # Prints out an enumerated games list.
             i = 1
-            for item in games:
-                print(f"{i}. {item}")
+            for game in games:
+                print(f"{i}. {game}")
                 i += 1
 
             # Calls select_game function with the games, web, and time lists as parameters.
-            choice = int(input("Which game would you like? "))
-            choice = choice - 1
+            choice = input("Which game would you like? ").lower()
+            if choice == "exit":
+                break
+            else:
+                choice = int(choice) - 1
 
             preference = input("Which do you prefer? \n"
                                "1. Main Story \n"
