@@ -1,0 +1,16 @@
+Action
+Adventure
+Driving
+Fighting
+First-Person
+Platform
+Puzzle
+Racing
+Real-Time Strategy
+Rhythm
+Sandbox
+Shooter
+Simulation
+Sport
+Stealth
+Third-Person

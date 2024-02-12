@@ -1,8 +1,7 @@
 from howlongtobeatpy import HowLongToBeat
-from database import Database
+from backlog import Database
 import requests
 import selectorlib
-from bs4 import BeautifulSoup
 
 database = Database("backlog.db")
 
@@ -10,48 +9,57 @@ database = Database("backlog.db")
 # Grabs database information.
 def get_games():
     games = []
-    data = database.view()
+    # Opens database
+    data = database.view_backlog()
     for item in data:
         temp = ""
+        # Takes each column, converts into a string, and adds into temp.
         for column in item:
             temp += f"{str(column)} "
+        # Appends data from temp into games.
         games.append(temp)
     return games
 
 
 # Searches for game titles based on user input.
 def find_game(game):
+    # Searches for game info using HowLongToBeat API.
     results = HowLongToBeat(0.0).search(game, similarity_case_sensitive=False)
     return results
 
 
 # Selects game from games list.
 def game_selection(game, user_choice):
+    # Returns title selected game.
     game_choice = game[user_choice]
     return game_choice
 
 
 # Selects url from web list.
 def url_selection(weblink, user_choice):
+    # Returns url selected game.
     web_choice = weblink[user_choice]
     return web_choice
 
 
 # Selects time from time list.
 def time_selection(time_entry, user_choice):
+    # Returns completion time for selected game.
     time_choice = time_entry[user_choice]
     return time_choice
 
 
+# Grabs genre of specified game from howlongtobeat
 def get_genre(web_link):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 '
                       '(KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
     response = requests.get(web_link, headers=headers)
     source = response.text
+    # Points to specified yaml file.
     extractor = selectorlib.Extractor.from_yaml_file("howlongtobeat.yaml")
     values = extractor.extract(source)["genre"]
-    # To accommodate for games that have multiple divs with the same name and/or multiple genres.
+    # Returns genre(s).
     for value in values:
         if "Genre s" in value:
             return value[10:]
@@ -59,14 +67,17 @@ def get_genre(web_link):
             return value[8:]
 
 
+# Grabs genre from howlongtobeat if genre is under a differently named div.
 def get_genre2(web_link):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 '
                       '(KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
     response = requests.get(web_link, headers=headers)
     source = response.text
+    # Points to specified yaml file.
     extractor = selectorlib.Extractor.from_yaml_file("howlongtobeat2.yaml")
     values = extractor.extract(source)["genre"]
+    # Returns genre(s).
     for value in values:
         if "Genre s" in value:
             return value[10:]
@@ -74,19 +85,26 @@ def get_genre2(web_link):
             return value[8:]
 
 
-def get_all_genres():
-    url = requests.get('https://howlongtobeat.com/')
-    soup = BeautifulSoup(url.text, 'html.parser')
+# Organizes items in genres.txt into alphabetical order and outputs into sorted_genres.txt.
+def alphabetize_genres():
+    with open("genres.txt", "rt") as file:
+        lines = file.readlines()
+        file.close()
 
-    soup = soup.prettify()
-    print(soup)
+    with open("sorted_genres.txt", "wt") as file2:
+        file2.writelines(sorted(lines))
+        file2.close()
 
 
-# get_all_genres()
+def grab_genres():
+    with open("sorted_genres.txt", "r") as file:
+        return file.readlines()
 
 
+# Grabs game rating from metacritic
 def get_metacritic_score(game):
     game = str(game).lower()
+    # Replaces some special characters to prevent errors.
     game = game.replace(".", " ").replace("'", "").replace("ö", "o").replace(":", "")
     url = f"https://www.metacritic.com/search/{game}"
     headers = {
@@ -94,31 +112,83 @@ def get_metacritic_score(game):
                       '(KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
     response = requests.get(url, headers=headers)
     source = response.text
+    # Points to specified yaml file.
     extractor = selectorlib.Extractor.from_yaml_file("metacritic.yaml")
-    value = extractor.extract(source)["score"][0]
-    return float(value)
+    try:
+        value = extractor.extract(source)["score"][0]
+        # Returns 0 if score is "tbd". Otherwise, returns score.
+        if value == "tbd":
+            return 0
+        else:
+            return float(value)
+    except TypeError:
+        return 0
 
 
+# Generates fun quotient using game rating, time to beat, and user preference.
 def calculate_fun_quotient(rate, main, extra, completionist, preference):
+    # If preference is main story.
     if preference == "1" and main != 0:
-        fun_quotient = rate/main
+        fun_quotient = rate / main
+
+    # If preference is extras.
     elif preference == "2" and extra != 0:
-        fun_quotient = rate/extra
+        fun_quotient = rate / extra
+
+    # If preference is completionist.
     elif preference == "3" and completionist != 0:
-        fun_quotient = rate/completionist
+        fun_quotient = rate / completionist
+
+    # Sets quotient to 0 to prevent errors.
     else:
         fun_quotient = 0
+
     return fun_quotient
 
 
+# Adds item to database.
 def add_to_database(games_title, genre_selection, metacritic_score,
                     main_story, main_story_and_extras, completionist, fun_quotient):
-    database.insert(games_title, genre_selection, metacritic_score,
-                    main_story, main_story_and_extras, completionist, fun_quotient)
+    database.insert_backlog(games_title, genre_selection, metacritic_score,
+                            main_story, main_story_and_extras, completionist, fun_quotient)
 
 
+# Removes item from database.
 def remove_from_database(selection):
-    database.delete(selection)
+    database.delete_backlog(selection)
 
 
+def add_preference(completion, genre):
+    database.insert_preference(completion, genre)
+
+
+def update_preference(row, completion, genre):
+    database.update_preference(row, completion, genre)
+
+
+def get_preference():
+    preferences = []
+    # Opens database
+    data = database.view_preference()
+    for item in data:
+        temp = ""
+        # Takes each column, converts into a string, and adds into temp.
+        for column in item:
+            temp += f"{str(column)} "
+        # Appends data from temp into preferences.
+        preferences.append(temp)
+    return preferences
+
+
+def search_preference_genre():
+    preference = []
+    data = database.search_preference_genre()
+    for item in data:
+        preference.append(item)
+
+    return preference
+
+
+def search_preference_completion():
+    return database.search_preference_completion()
 

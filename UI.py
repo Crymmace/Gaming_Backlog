@@ -7,9 +7,24 @@ images = []
 main_story = []
 extras = []
 completionist = []
+entries = []
+
+
 genres = []
-selected_genres = []
-options = ["1. Main Story", "2. Main Story and Extras", "3. Completionist"]
+for entry in functions.grab_genres():
+    genres.append(entry)
+
+selected_genre = []
+for entry in functions.search_preference_genre():
+    if entry:
+        selected_genre.append(entry[0].split(","))
+        selected_genre = selected_genre[0]
+
+options = ["Main Story", "Main Story and Extras", "Completionist"]
+selected_option = ""
+if functions.search_preference_completion():
+    selected_option = functions.search_preference_completion()
+    selected_option = selected_option[0][0]
 
 gui.theme("BlueMono")
 
@@ -28,8 +43,11 @@ database_layout = [
 ]
 
 preference_layout = [
-    [gui.Listbox(values=options, key="choice", enable_events=True, size=(20, 5)), gui.Button("Select")],
-    [gui.Text("", key="text")]
+    [gui.Listbox(values=options, key="choice", enable_events=True, size=(20, 5))],
+    [gui.Text(f"Current selection is: {selected_option}", key="text")],
+    [gui.Listbox(values=genres, key="genre_options", enable_events=True, size=(20, 5)), gui.Button("-->"),
+     gui.Button("<--"), gui.Listbox(values=selected_genre, key="genre_choice", enable_events=True, size=(20, 5))],
+    [gui.Button("Save Preferences")]
 ]
 
 tab_group = [
@@ -60,9 +78,38 @@ while True:
                 completionist.append(times.completionist)
             window['games'].update(values=new_games)
 
-        case "Select":
-            preference = values['choice'][0][0]
-            window['text'].update(value=f"{values['choice'][0]}")
+        case "-->":
+            genre_choice = values['genre_options'][0]
+            selected_genre.append(genre_choice)
+            genres.remove(genre_choice)
+            window['genre_options'].update(values=genres)
+            window['genre_choice'].update(values=selected_genre)
+
+        case "<--":
+            genre_choice = values['genre_choice'][0]
+            genres.append(genre_choice)
+            genres = sorted(genres)
+            selected_genre.remove(genre_choice)
+            window['genre_options'].update(values=genres)
+            window['genre_choice'].update(values=selected_genre)
+
+        case "Save Preferences":
+            completion = values['choice'][0]
+            genre = selected_genre
+            new_genre = []
+            for entry in genre:
+                new_genre.append(entry.replace("\n", ""))
+            print(new_genre)
+            new_genre = ' ,'.join(new_genre)
+            print(new_genre)
+            print(completion)
+            if not functions.get_preference():
+                functions.add_preference(completion, new_genre)
+            if functions.get_preference():
+                functions.update_preference(1, completion, new_genre)
+
+            window['genre_choice'].update(values=selected_genre)
+            window['text'].update(values=f"Current selection is: {selected_option}")
 
         case "Add":
             try:
@@ -82,9 +129,17 @@ while True:
                 if not genre:
                     genre = functions.get_genre2(url_selection)
 
+                print(genre)
+
                 rating = functions.get_metacritic_score(game_selection)
                 fun = functions.calculate_fun_quotient(rating, main_selection, extra_selection,
-                                                       completionist_selection, preference)
+                                                       completionist_selection, selected_option)
+
+                for entry in selected_genre:
+                    if entry[:-1] in genre:
+                        entries.append(entry)
+
+                fun = fun + len(entries)
                 functions.add_to_database(game_selection, genre, rating, main_selection, extra_selection,
                                           completionist_selection, fun)
 
@@ -103,10 +158,10 @@ while True:
         case "Delete":
             try:
                 game_to_delete = values['database_games'][0]
+                game_to_delete = game_to_delete.split(" ")
                 games = functions.get_games()
                 functions.remove_from_database(game_to_delete[0])
                 functions.get_games()
-                window['database_games'].update(values=games)
                 window['game'].update(value="")
             except IndexError:
                 gui.popup("Please select an item.", font=("Helvetica", 20))
@@ -114,12 +169,10 @@ while True:
         case "Exit":
             break
 
-        case "todos":
-            window['todo'].update(value=values['todos'][0])
-
         case gui.WIN_CLOSED:
             break
 
 window.close()
 
-
+# TODO: Clean up UI
+# TODO: Figure out why UI is slow
