@@ -2,12 +2,9 @@ import functions
 import PySimpleGUI as gui
 
 new_games = []
-web = []
-images = []
-main_story = []
-extras = []
-completionist = []
+ids = []
 entries = []
+preferred_time = []
 
 
 genres = []
@@ -19,6 +16,15 @@ for entry in functions.search_preference_genre():
     if entry:
         selected_genre.append(entry[0].split(","))
         selected_genre = selected_genre[0]
+
+for entry in selected_genre:
+    entry = entry + "\n"
+    entry = entry.replace(" ", "")
+    if entry in genres:
+        genres.remove(entry)
+
+print(selected_genre)
+print(genres)
 
 options = ["Main Story", "Main Story and Extras", "Completionist"]
 selected_option = ""
@@ -64,18 +70,16 @@ while True:
     event, values = window.read(timeout=10)
     match event:
         case "Search":
+            new_games.clear()
+            ids.clear()
+            window['game'].update(value="")
+            window['games'].update(values=new_games)
             id_ = values["game"]
             new_game = functions.find_game(id_)
             for game in new_game:
                 new_games.append(game.game_name)
-            for url in new_game:
-                web.append(url.game_web_link)
-            for image in new_game:
-                images.append(image.game_image_url)
-            for times in new_game:
-                main_story.append(times.main_story)
-                extras.append(times.main_extra)
-                completionist.append(times.completionist)
+            for ID in new_game:
+                ids.append(ID.game_id)
             window['games'].update(values=new_games)
 
         case "-->":
@@ -94,60 +98,71 @@ while True:
             window['genre_choice'].update(values=selected_genre)
 
         case "Save Preferences":
-            completion = values['choice'][0]
+            try:
+                completion = values['choice'][0]
+
+            except IndexError:
+                if selected_option != "":
+                    completion = selected_option
+                else:
+                    completion = "Main Story"
+
+            selected_option = completion
             genre = selected_genre
             new_genre = []
             for entry in genre:
                 new_genre.append(entry.replace("\n", ""))
-            print(new_genre)
             new_genre = ' ,'.join(new_genre)
-            print(new_genre)
-            print(completion)
             if not functions.get_preference():
                 functions.add_preference(completion, new_genre)
-            if functions.get_preference():
+            else:
                 functions.update_preference(1, completion, new_genre)
 
             window['genre_choice'].update(values=selected_genre)
-            window['text'].update(values=f"Current selection is: {selected_option}")
+            window['text'].update(value=f"Current selection is: {selected_option}")
 
         case "Add":
-            try:
-                selected_game = values['games'][0]
+            selected_game = values['games'][0]
 
-                selection = new_games.index(selected_game)
+            selection = new_games.index(selected_game)
 
-                game_selection = functions.game_selection(new_games, selection)
+            game_selection = new_games[selection]
 
-                url_selection = functions.url_selection(web, selection)
-                main_selection = functions.time_selection(main_story, selection)
-                extra_selection = functions.time_selection(extras, selection)
-                completionist_selection = functions.time_selection(completionist, selection)
+            id_selection = ids[selection]
 
-                genre = functions.get_genre(url_selection)
+            game_search = functions.find_game_by_id(id_selection)
+            main_story = game_search.main_story
+            extras = game_search.main_extra
+            completionist = game_search.completionist
+            url = game_search.game_web_link
 
-                if not genre:
-                    genre = functions.get_genre2(url_selection)
+            genre = functions.get_genre(url)
 
-                print(genre)
+            if not genre:
+                genre = functions.get_genre2(url)
 
-                rating = functions.get_metacritic_score(game_selection)
-                fun = functions.calculate_fun_quotient(rating, main_selection, extra_selection,
-                                                       completionist_selection, selected_option)
+            print(genre)
 
-                for entry in selected_genre:
-                    if entry[:-1] in genre:
-                        entries.append(entry)
+            rating = functions.get_metacritic_score(game_selection)
+            fun = functions.calculate_fun_quotient(rating, main_story, extras, completionist, selected_option)
 
+            for entry in selected_genre:
+                if entry in genre:
+                    entries.append(entry)
+
+            print(entries)
+
+            if entries:
+                print(fun)
                 fun = fun + len(entries)
-                functions.add_to_database(game_selection, genre, rating, main_selection, extra_selection,
-                                          completionist_selection, fun)
+                print(fun)
 
-                games = functions.get_games()
-                new_game = values['games']
-                new_games.clear()
-            except NameError:
-                error = gui.popup_ok("Please select a preference.")
+            functions.add_to_database(game_selection, genre, rating, main_story, extras,
+                                      completionist, fun)
+
+            new_games.clear()
+            entries.clear()
+            window['games'].update(values=new_games)
 
         case "Update":
             games = functions.get_games()

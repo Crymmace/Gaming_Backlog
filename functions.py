@@ -28,25 +28,9 @@ def find_game(game):
     return results
 
 
-# Selects game from games list.
-def game_selection(game, user_choice):
-    # Returns title selected game.
-    game_choice = game[user_choice]
-    return game_choice
-
-
-# Selects url from web list.
-def url_selection(weblink, user_choice):
-    # Returns url selected game.
-    web_choice = weblink[user_choice]
-    return web_choice
-
-
-# Selects time from time list.
-def time_selection(time_entry, user_choice):
-    # Returns completion time for selected game.
-    time_choice = time_entry[user_choice]
-    return time_choice
+def find_game_by_id(id_):
+    result = HowLongToBeat(0.0).search_from_id(id_)
+    return result
 
 
 # Grabs genre of specified game from howlongtobeat
@@ -127,23 +111,16 @@ def get_metacritic_score(game):
 
 # Generates fun quotient using game rating, time to beat, and user preference.
 def calculate_fun_quotient(rate, main, extra, completionist, preference):
-    # If preference is main story.
-    if preference == "1" and main != 0:
-        fun_quotient = rate / main
+    if preference == "Main Story" and main != 0:
+        return round(rate / main, 1)
 
     # If preference is extras.
-    elif preference == "2" and extra != 0:
-        fun_quotient = rate / extra
+    elif preference == "Main Story and Extras" and extra != 0:
+        return round(rate / extra, 1)
 
     # If preference is completionist.
-    elif preference == "3" and completionist != 0:
-        fun_quotient = rate / completionist
-
-    # Sets quotient to 0 to prevent errors.
-    else:
-        fun_quotient = 0
-
-    return fun_quotient
+    elif preference == "Completionist" and completionist != 0:
+        return round(rate / completionist, 1)
 
 
 # Adds item to database.
